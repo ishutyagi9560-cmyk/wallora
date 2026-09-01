@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Wallora - HD Wallpapers</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#9140ff">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
+}
+
+body{
+  font-family:Arial,Helvetica,sans-serif;
+  background:#08070d;
+  color:#fff;
+  min-height:100vh;
+}
+
+button,input{font:inherit}
+button{border:0;cursor:pointer}
+
+.app{
+  max-width:700px;
+  margin:auto;
+  min-height:100vh;
+  padding-bottom:105px;
+}
+
+/* HEADER */
+.header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:28px 20px 18px;
+}
+
+.logo{
+  font-size:32px;
+  font-weight:800;
+  background:linear-gradient(90deg,#9140ff,#d25cff);
+  -webkit-background-clip:text;
+  color:transparent;
+}
+
+.sparkle{
+  width:58px;
+  height:58px;
+  border-radius:50%;
+  background:linear-gradient(135deg,#8d3cff,#ca5cff);
+  color:white;
+  font-size:25px;
+}
+
+/* SEARCH */
+.search{
+  margin:22px 20px;
+  height:62px;
+  border:1px solid #292633;
+  background:#15141e;
+  border-radius:23px;
+  display:flex;
+  align-items:center;
+  padding:0 18px;
+  gap:12px;
+}
+
+.search span{font-size:22px}
+
+.search input{
+  width:100%;
+  background:none;
+  border:0;
+  outline:0;
+  color:#fff;
+  font-size:17px;
+}
+
+.search input::placeholder{color:#777481}
+
+/* PAGE */
+.page{display:none}
+.page.active{display:block}
+
+/* SECTION */
+.section{
+  padding:0 20px;
+  margin-top:28px;
+}
+
+.section-title{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:18px;
+}
+
+.section-title h2{font-size:25px}
+
+.see{
+  background:none;
+  color:#b55cff;
+  font-size:16px;
+}
+
+/* FEATURED */
+.featured{
+  position:relative;
+  height:430px;
+  margin:0 20px;
+  border-radius:30px;
+  overflow:hidden;
+}
+
+.featured img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.featured:after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(
+    transparent 30%,
+    rgba(0,0,0,.9)
+  );
+}
+
+.feature-info{
+  position:absolute;
+  z-index:2;
+  left:28px;
+  bottom:28px;
+}
+
+.feature-info small{
+  color:#c58aff;
+  font-size:16px;
+}
+
+.feature-info h1{
+  margin-top:8px;
+  font-size:31px;
+}
+
+.view-btn{
+  position:absolute;
+  z-index:3;
+  right:22px;
+  bottom:26px;
+  padding:16px 25px;
+  border-radius:18px;
+  color:#fff;
+  font-weight:bold;
+  background:linear-gradient(90deg,#9140ff,#c85cff);
+}
+
+/* CATEGORIES */
+.categories{
+  display:flex;
+  gap:12px;
+  overflow-x:auto;
+  scrollbar-width:none;
+  padding-bottom:5px;
+}
+
+.categories::-webkit-scrollbar{display:none}
+
+.category-btn{
+  flex-shrink:0;
+  padding:14px 21px;
+  border-radius:20px;
+  background:#15141e;
+  border:1px solid #292633;
+  color:#ddd;
+  font-size:16px;
+}
+
+.category-btn.active{
+  color:white;
+  border-color:transparent;
+  background:linear-gradient(90deg,#8d3cff,#bd55ff);
+}
+
+/* GRID */
+.wallpaper-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:17px;
+}
+
+.wallpaper-card{
+  position:relative;
+  height:285px;
+  border-radius:24px;
+  overflow:hidden;
+  background:#15141e;
+}
+
+.wallpaper-card img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  transition:.3s;
+}
+
+.wallpaper-card:active img{
+  transform:scale(1.04);
+}
+
+.card-overlay{
+  position:absolute;
+  inset:0;
+  background:linear-gradient(
+    transparent 45%,
+    rgba(0,0,0,.85)
+  );
+}
+
+.card-name{
+  position:absolute;
+  left:16px;
+  bottom:15px;
+  font-size:17px;
+  font-weight:bold;
+}
+
+.heart{
+  position:absolute;
+  right:12px;
+  top:12px;
+  width:45px;
+  height:45px;
+  border-radius:50%;
+  background:rgba(25,25,32,.78);
+  color:white;
+  font-size:23px;
+  z-index:4;
+}
+
+.heart.liked{color:#ff3295}
+
+/* PAGE HEADER */
+.page-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:25px 20px;
+}
+
+.back{
+  width:52px;
+  height:52px;
+  border-radius:50%;
+  background:#171620;
+  color:white;
+  font-size:25px;
+}
+
+.page-title{
+  font-size:27px;
+}
+
+/* DETAIL */
+.detail-image{
+  position:relative;
+  height:680px;
+  margin:0 15px;
+  border-radius:30px;
+  overflow:hidden;
+}
+
+.detail-image img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.detail-top{
+  position:absolute;
+  top:18px;
+  left:15px;
+  right:15px;
+  display:flex;
+  justify-content:space-between;
+  z-index:5;
+}
+
+.detail-bottom{
+  position:absolute;
+  left:25px;
+  right:25px;
+  bottom:24px;
+  z-index:5;
+}
+
+.detail-bottom small{
+  color:#c45cff;
+  font-size:16px;
+}
+
+.detail-bottom h1{
+  font-size:31px;
+  margin:9px 0 18px;
+}
+
+.action-btn{
+  width:100%;
+  height:62px;
+  margin-top:11px;
+  border-radius:21px;
+  background:#171620;
+  color:white;
+  border:1px solid #302d3b;
+  font-weight:bold;
+  font-size:17px;
+}
+
+.action-btn.primary{
+  background:linear-gradient(90deg,#9140ff,#c35aff);
+  border:0;
+}
+
+/* FAVORITES */
+.empty{
+  text-align:center;
+  padding:90px 20px;
+  color:#888;
+}
+
+.empty div{
+  font-size:58px;
+  margin-bottom:15px;
+}
+
+/* SETTINGS */
+.settings-list{margin:0 20px}
+
+.setting{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:19px 15px;
+  background:#15141e;
+  border-bottom:1px solid #292733;
+}
+
+.setting:first-child{
+  border-radius:20px 20px 0 0;
+}
+
+.setting:last-child{
+  border-radius:0 0 20px 20px;
+}
+
+.setting-left{
+  display:flex;
+  gap:15px;
+  align-items:center;
+}
+
+.setting-icon{font-size:22px}
+
+.setting-name{font-size:16px}
+
+.arrow{
+  color:#999;
+  font-size:23px;
+}
+
+.switch{
+  width:50px;
+  height:28px;
+  border-radius:20px;
+  background:#555;
+  padding:3px;
+}
+
+.switch span{
+  display:block;
+  width:22px;
+  height:22px;
+  background:white;
+  border-radius:50%;
+}
+
+.switch.on{
+  background:#9845ff;
+}
+
+.switch.on span{
+  margin-left:22px;
+}
+
+/* BOTTOM NAV */
+.bottom-nav{
+  position:fixed;
+  bottom:14px;
+  left:50%;
+  transform:translateX(-50%);
+  width:calc(100% - 30px);
+  max-width:670px;
+  height:78px;
+  background:rgba(25,24,34,.97);
+  border:1px solid #302e3b;
+  border-radius:30px;
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+  z-index:20;
+  backdrop-filter:blur(15px);
+}
+
+.nav-btn{
+  background:none;
+  color:#777581;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:5px;
+  font-size:13px;
+}
+
+.nav-icon{font-size:24px}
+
+.nav-btn.active{color:#ad52ff}
+
+/* TOAST */
+.toast{
+  position:fixed;
+  left:50%;
+  bottom:105px;
+  transform:translateX(-50%) translateY(20px);
+  background:#24222e;
+  padding:14px 22px;
+  border-radius:15px;
+  opacity:0;
+  pointer-events:none;
+  transition:.3s;
+  z-index:50;
+  white-space:nowrap;
+}
+
+.toast.show{
+  opacity:1;
+  transform:translateX(-50%) translateY(0);
+}
+
+/* DESKTOP */
+@media(min-width:700px){
+  .wallpaper-grid{
+    grid-template-columns:repeat(3,1fr);
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<!-- HOME -->
+<div id="homePage" class="page active">
+
+<div class="header">
+  <div class="logo">Wallora</div>
+  <button class="sparkle"
+    onclick="showToast('✨ Welcome to Wallora!')">✨</button>
+</div>
+
+<div class="search">
+  <span>🔍</span>
+  <input id="searchInput"
+    placeholder="Search wallpapers..."
+    oninput="searchWallpapers()">
+</div>
+
+<div class="section-title section">
+  <h2>Featured</h2>
+  <button class="see"
+    onclick="openDetail(0)">See All</button>
+</div>
+
+<div class="featured">
+<img src="https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=900&q=85">
+
+<div class="feature-info">
+<small>Wallpaper of the day</small>
+<h1>Into The Wild</h1>
+</div>
+
+<button class="view-btn"
+onclick="openDetail(0)">View</button>
+</div>
+
+<div class="section">
+
+<div class="section-title">
+<h2>Categories</h2>
+<button class="see"
+onclick="goPage('categories')">See All</button>
+</div>
+
+<div class="categories">
+
+<button class="category-btn active"
+onclick="filterHome('all',this)">✨ All</button>
+
+<button class="category-btn"
+onclick="filterHome('nature',this)">🌿 Nature</button>
+
+<button class="category-btn"
+onclick="filterHome('cars',this)">🚘 Cars</button>
+
+<button class="category-btn"
+onclick="filterHome('anime',this)">🎨 Anime</button>
+
+<button class="category-btn"
+onclick="filterHome('space',this)">🌌 Space</button>
+
+<button class="category-btn"
+onclick="filterHome('abstract',this)">🎨 Abstract</button>
+
+</div>
+</div>
+
+<div class="section">
+
+<div class="section-title">
+<h2>Trending Now</h2>
+<button class="see"
+onclick="showToast('🔥 Trending Wallpapers')">
+See All
+</button>
+</div>
+
+<div id="homeGrid" class="wallpaper-grid"></div>
+
+</div>
+</div>
+
+
+<!-- CATEGORIES -->
+<div id="categoriesPage" class="page">
+
+<div class="page-header">
+<button class="back"
+onclick="goBack()">←</button>
+
+<h1 class="page-title">Categories</h1>
+
+<button class="back"
+onclick="showToast('🔍 Search')">🔍</button>
+</div>
+
+<div class="section">
+
+<div class="categories">
+
+<button class="category-btn active"
+onclick="filterCategory('all',this)">✨ All</button>
+
+<button class="category-btn"
+onclick="filterCategory('nature',this)">🌿 Nature</button>
+
+<button class="category-btn"
+onclick="filterCategory('cars',this)">🚘 Cars</button>
+
+<button class="category-btn"
+onclick="filterCategory('anime',this)">🎨 Anime</button>
+
+<button class="category-btn"
+onclick="filterCategory('space',this)">🌌 Space</button>
+
+<button class="category-btn"
+onclick="filterCategory('abstract',this)">🎨 Abstract</button>
+
+</div>
+</div>
+
+<div class="section">
+<div id="categoryGrid" class="wallpaper-grid"></div>
+</div>
+
+</div>
+
+
+<!-- FAVORITES -->
+<div id="favoritesPage" class="page">
+
+<div class="page-header">
+<h1 class="page-title">Favorites ❤️</h1>
+</div>
+
+<div class="section">
+<div id="favoriteGrid" class="wallpaper-grid"></div>
+</div>
+
+</div>
+
+
+<!-- SETTINGS -->
+<div id="settingsPage" class="page">
+
+<div class="page-header">
+<h1 class="page-title">Settings</h1>
+</div>
+
+<div class="settings-list">
+
+<div class="setting"
+onclick="showToast('👑 Premium feature')">
+<div class="setting-left">
+<span class="setting-icon">👑</span>
+<span class="setting-name">Remove Ads</span>
+</div>
+<span class="arrow">›</span>
+</div>
+
+<div class="setting"
+onclick="toggleSetting(this)">
+<div class="setting-left">
+<span class="setting-icon">📅</span>
+<span class="setting-name">Daily Wallpaper</span>
+</div>
+<div class="switch on"><span></span></div>
+</div>
+
+<div class="setting"
+onclick="toggleSetting(this)">
+<div class="setting-left">
+<span class="setting-icon">🔄</span>
+<span class="setting-name">Auto Change</span>
+</div>
+<div class="switch"><span></span></div>
+</div>
+
+<div class="setting"
+onclick="showToast('⭐ Thanks for rating Wallora!')">
+<div class="setting-left">
+<span class="setting-icon">☆</span>
+<span class="setting-name">Rate Us</span>
+</div>
+<span class="arrow">›</span>
+</div>
+
+<div class="setting"
+onclick="shareApp()">
+<div class="setting-left">
+<span class="setting-icon">↗</span>
+<span class="setting-name">Share App</span>
+</div>
+<span class="arrow">›</span>
+</div>
+
+<div class="setting"
+onclick="showToast('🔒 Privacy Policy')">
+<div class="setting-left">
+<span class="setting-icon">🔒</span>
+<span class="setting-name">Privacy Policy</span>
+</div>
+<span class="arrow">›</span>
+</div>
+
+<div class="setting"
+onclick="showToast('ℹ️ Wallora HD Wallpapers')">
+<div class="setting-left">
+<span class="setting-icon">ⓘ</span>
+<span class="setting-name">About Us</span>
+</div>
+<span class="arrow">›</span>
+</div>
+
+</div>
+</div>
+
+
+<!-- DETAIL -->
+<div id="detailPage" class="page">
+
+<div class="detail-image">
+
+<img id="detailImg" src="">
+
+<div class="detail-top">
+
+<button class="back"
+onclick="goBack()">←</button>
+
+<button id="detailHeart"
+class="heart"
+onclick="toggleDetailFavorite()">♡</button>
+
+</div>
+
+<div class="detail-bottom">
+
+<small>Wallora Wallpaper</small>
+
+<h1 id="detailTitle">Wallpaper</h1>
+
+<button class="action-btn"
+onclick="downloadWallpaper()">
+↓ Download
+</button>
+
+<button class="action-btn primary"
+onclick="setWallpaper()">
+✨ Set Wallpaper
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+
+<button id="navHome"
+class="nav-btn active"
+onclick="goPage('home')">
+<span class="nav-icon">⌂</span>
+Home
+</button>
+
+<button id="navCategories"
+class="nav-btn"
+onclick="goPage('categories')">
+<span class="nav-icon">▱</span>
+Categories
+</button>
+
+<button id="navFavorites"
+class="nav-btn"
+onclick="goPage('favorites')">
+<span class="nav-icon">♡</span>
+Favorites
+</button>
+
+<button id="navSettings"
+class="nav-btn"
+onclick="goPage('settings')">
+<span class="nav-icon">⚙</span>
+Settings
+</button>
+
+</div>
+
+</div>
+
+<div id="toast" class="toast"></div>
+
+
+<script>
+
+/* WALLPAPERS */
+
+const wallpapers = [
+
+{
+  title:"Into The Wild",
+  category:"nature",
+  image:"https://images.unsplash.com/photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=900&q=85"
+},
+
+{
+  title:"Mountain Lake",
+  category:"nature",
+  image:"https://images.unsplash.com/photo-1501785888041-af3ef285b470?auto=format&fit=crop&w=900&q=85"
+},
+
+{
+  title:"Forest",
+  category:"nature",
+  image:"https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=900&q=85"
+},
+
+{
+  title:"Red Sports Car",
+  category:"cars",
+  image:"https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=900&q=85"
+},
+
+{
+  title:"Luxury Car",
+  category:"cars",
+  image:"https://images.unsplash.com/photo-1494976388531-d1058494cdd8?auto=format&fit=crop&w=900&q=85"
+},
+
+{
+  title:"Night Car",
+  category:"cars",
+  image:"https://images.unsplash.com/photo-1544829099-b9a0c07fad1a?auto=format&fit=crop&w=900&q=85"
+},
+
+{
+  title:"Anime Dream",
+  category:"anime",
+  image:"https://images.unsplash.com/photo-1578632767115-351597cf2477?auto=format&fit=crop&w=900&q=85"
+},
+
+{
+  title:"Anime World",
+  category:"anime",
+  image:"https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=900&q=85"
+},
+
+{
+  title:"Anime Sunset",
+  category:"anime",
+  image:"https://images.unsplash.com/photo-1635805737707-575885ab0820?auto=format&fit=crop&w=900&q=85"
+},
+
+{
+  title:"Galaxy",
+  category:"space",
+  image:"https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=900&q=85"
+},
+
+{
+  title:"Night Sky",
+  category:"space",
+  image:"https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=900&q=85"
+},
+
+{
+  title:"Earth From Space",
+  category:"space",
+  image:"https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=900&q=85"
+},
+
+{
+  title:"Color Waves",
+  category:"abstract",
+  image:"https://images.unsplash.com/photo-1541701494587-cb58502866ab?auto=format&fit=crop&w=900&q=85"
+},
+
+{
+  title:"Purple Art",
+  category:"abstract",
+  image:"https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&w=900&q=85"
+},
+
+{
+  title:"Creative",
+  category:"abstract",
+image:"https://images.unsplash.com/photo-1549490349-8643362247b5?auto=format&fit=crop&w=900&q=85"
+}
+
+];
+
+
+/* VARIABLES */
+
+let favorites=
+JSON.parse(
+localStorage.getItem("walloraFavorites")||"[]"
+);
+
+let currentWallpaper=0;
+let previousPage="home";
+
+
+/* CARD */
+
+function createCard(item,index){
+
+const liked=favorites.includes(index);
+
+return`
+
+<div class="wallpaper-card"
+onclick="openDetail(${index})">
+
+<img src="${item.image}" loading="lazy">
+
+<div class="card-overlay"></div>
+
+<button class="heart ${liked?"liked":""}"
+onclick="event.stopPropagation();
+toggleFavorite(${index})">
+
+${liked?"♥":"♡"}
+
+</button>
+
+<div class="card-name">
+${item.title}
+</div>
+
+</div>
+
+`;
+
+}
+
+
+/* HOME */
+
+function renderHome(){
+
+document.getElementById("homeGrid").innerHTML=
+wallpapers.map((item,index)=>
+createCard(item,index)
+).join("");
+
+}
+
+
+/* CATEGORIES */
+
+function renderCategories(category="all"){
+
+let result=wallpapers;
+
+if(category!=="all"){
+result=wallpapers.filter(
+item=>item.category===category
+);
+}
+
+document.getElementById("categoryGrid").innerHTML=
+result.map(item=>
+createCard(
+item,
+wallpapers.indexOf(item)
+)
+).join("");
+
+}
+
+
+/* HOME FILTER */
+
+function filterHome(category,button){
+
+document
+.querySelectorAll("#homePage .category-btn")
+.forEach(b=>b.classList.remove("active"));
+
+button.classList.add("active");
+
+let result=wallpapers;
+
+if(category!=="all"){
+result=wallpapers.filter(
+item=>item.category===category
+);
+}
+
+document.getElementById("homeGrid").innerHTML=
+result.map(item=>
+createCard(
+item,
+wallpapers.indexOf(item)
+)
+).join("");
+
+}
+
+
+/* CATEGORY FILTER */
+
+function filterCategory(category,button){
+
+document
+.querySelectorAll("#categoriesPage .category-btn")
+.forEach(b=>b.classList.remove("active"));
+
+button.classList.add("active");
+
+renderCategories(category);
+
+}
+
+
+/* SEARCH */
+
+function searchWallpapers(){
+
+const value=
+document.getElementById("searchInput")
+.value
+.toLowerCase()
+.trim();
+
+let result=wallpapers;
+
+if(value){
+
+result=wallpapers.filter(item=>
+item.title.toLowerCase().includes(value) ||
+item.category.toLowerCase().includes(value)
+);
+
+}
+
+document.getElementById("homeGrid").innerHTML=
+result.map(item=>
+createCard(
+item,
+wallpapers.indexOf(item)
+)
+).join("");
+
+}
+
+
+/* FAVORITE */
+
+function toggleFavorite(index){
+
+if(favorites.includes(index)){
+
+favorites=
+favorites.filter(i=>i!==index);
+
+showToast("♡ Removed from Favorites");
+
+}else{
+
+favorites.push(index);
+
+showToast("♥ Added to Favorites");
+
+}
+
+localStorage.setItem(
+"walloraFavorites",
+JSON.stringify(favorites)
+);
+
+renderHome();
+renderCategories();
+renderFavorites();
+
+updateDetailHeart();
+
+}
+
+
+/* FAVORITES PAGE */
+
+function renderFavorites(){
+
+const grid=
+document.getElementById("favoriteGrid");
+
+if(favorites.length===0){
+
+grid.innerHTML=`
+
+<div class="empty"
+style="grid-column:1/-1">
+
+<div>♡</div>
+
+<h2>No Favorites Yet</h2>
+
+<p>Tap the heart on a wallpaper
+to save it here.</p>
+
+</div>
+
+`;
+
+return;
+
+}
+
+grid.innerHTML=
+favorites.map(index=>
+createCard(wallpapers[index],index)
+).join("");
+
+}
+
+
+/* DETAIL */
+
+function openDetail(index){
+
+currentWallpaper=index;
+
+previousPage=
+document
+.querySelector(".page.active")
+.id
+.replace("Page","");
+
+const item=wallpapers[index];
+
+document.getElementById("detailImg").src=
+item.image;
+
+document.getElementById("detailTitle").textContent=
+item.title;
+
+updateDetailHeart();
+
+hidePages();
+
+document
+.getElementById("detailPage")
+.classList.add("active");
+
+}
+
+
+function updateDetailHeart(){
+
+const heart=
+document.getElementById("detailHeart");
+
+if(favorites.includes(currentWallpaper)){
+
+heart.textContent="♥";
+heart.classList.add("liked");
+
+}else{
+
+heart.textContent="♡";
+heart.classList.remove("liked");
+
+}
+
+}
+
+
+function toggleDetailFavorite(){
+
+toggleFavorite(currentWallpaper);
+
+}
+
+
+/* NAVIGATION */
+
+function hidePages(){
+
+document
+.querySelectorAll(".page")
+.forEach(page=>
+page.classList.remove("active")
+);
+
+}
+
+
+function goPage(page){
+
+hidePages();
+
+document
+.getElementById(page+"Page")
+.classList.add("active");
+
+previousPage=page;
+
+document
+.querySelectorAll(".nav-btn")
+.forEach(btn=>
+btn.classList.remove("active")
+);
+
+const nav=
+document.getElementById(
+"nav"+
+page.charAt(0).toUpperCase()+
+page.slice(1)
+);
+
+if(nav)nav.classList.add("active");
+
+if(page==="home")renderHome();
+
+if(page==="categories")renderCategories();
+
+if(page==="favorites")renderFavorites();
+
+}
+
+
+function goBack(){
+
+goPage(previousPage==="detail"?"home":previousPage);
+
+}
+
+
+/* DOWNLOAD */
+
+function downloadWallpaper(){
+
+const item=wallpapers[currentWallpaper];
+
+showToast("⬇️ Download started");
+
+const link=document.createElement("a");
+
+link.href=item.image;
+link.download=
+"Wallora-"+item.title+".jpg";
+
+link.target="_blank";
+
+document.body.appendChild(link);
+link.click();
+link.remove();
+
+}
+
+
+/* SET WALLPAPER */
+
+function setWallpaper(){
+
+showToast(
+"✨ Wallpaper image opened — save it and set from your phone"
+);
+
+const item=wallpapers[currentWallpaper];
+
+window.open(item.image,"_blank");
+
+}
+
+
+/* SETTINGS */
+
+function toggleSetting(element){
+
+const sw=
+element.querySelector(".switch");
+
+if(!sw)return;
+
+sw.classList.toggle("on");
+
+showToast(
+sw.classList.contains("on")
+?"✅ Enabled"
+:"⭕ Disabled"
+);
+
+}
+
+
+/* SHARE */
+
+function shareApp(){
+
+if(navigator.share){
+
+navigator.share({
+
+title:"Wallora",
+text:"Check out Wallora HD Wallpapers!"
+
+});
+
+}else{
+
+showToast("↗️ Share feature available in app");
+
+}
+
+}
+
+
+/* TOAST */
+
+let toastTimer;
+
+function showToast(message){
+
+const toast=
+document.getElementById("toast");
+
+toast.textContent=message;
+
+toast.classList.add("show");
+
+clearTimeout(toastTimer);
+
+toastTimer=setTimeout(()=>{
+
+toast.classList.remove("show");
+
+},2500);
+
+}
+
+
+/* START */
+
+renderHome();
+renderCategories();
+renderFavorites();
+/* SERVICE WORKER */
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./sw.js")
+      .then(() => {
+        console.log("Wallora Service Worker registered");
+      })
+      .catch(error => {
+        console.log("Service Worker error:", error);
+      });
+  });
+}
+
+</script>
+
+</body>
+</html>
