@@ -1,0 +1,8 @@
+{
+  "name": "Wallora HD Wallpapers",
+  "short_name": "Wallora",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#08070d",
+  "theme_color": "#9140ff"
+}
