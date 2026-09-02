@@ -1200,39 +1200,25 @@ goPage(previousPage==="detail"?"home":previousPage);
 
 
 /* DOWNLOAD */
+
 function downloadWallpaper() {
 
   const item = wallpapers[currentWallpaper];
 
-    showToast("⬇️ Downloading...");
+  showToast("⬇️ Downloading...");
 
-    fetch(item.image)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error("Download failed");
-            }
-            return response.blob();
-        })
-        .then(blob => {
-            const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
 
-            const link = document.createElement("a");
-            link.href = url;
-            link.download = "Wallora-" + item.title + ".jpg";
+  link.href = item.image;
+  link.download = "Wallora-" + item.title + ".jpg";
+  link.target = "_self";
 
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
 
-            URL.revokeObjectURL(url);
-
-            showToast("✅ Wallpaper downloaded!");
-        })
-        .catch(error => {
-            console.log(error);
-            showToast("⚠️ Download blocked — use Save Image");
-        });
-  }
+  showToast("✅ Download started!");
+}
 
 
 /* SET WALLPAPER */
