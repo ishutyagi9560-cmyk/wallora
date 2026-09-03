@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.use_as_origin"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "io.github.ishutyagi9560_cmyk.twa",
+      "sha256_cert_fingerprints": [
+        "BE:87:97:36:42:FA:AE:BF:10:10:E2:BC:5F:E2:34:32:BA:86:86:C8:A0:5C:33:6C:CC:ED:84:83:4C:03:6F:C9"
+      ]
+    }
+  }
+]
