@@ -1,8 +1,27 @@
 {
   "name": "Wallora HD Wallpapers",
   "short_name": "Wallora",
-  "start_url": "./index.html",
+  "description": "Wallora is a beautiful HD wallpaper app with wallpapers for your phone.",
+  "id": "/wallora/",
+  "start_url": "/wallora/",
+  "scope": "/wallora/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#08070d",
-  "theme_color": "#9140ff"
+  "theme_color": "#9140ff",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/wallora/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/wallora/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
 }
