@@ -35,6 +35,10 @@ jobs:
         working-directory: android
         run: ./gradlew :app:assembleDebug --no-daemon
 
+      - name: Show debug SHA-256
+        working-directory: android
+        run: ./gradlew :app:signingReport
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:

@@ -25,6 +25,7 @@
     
         <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.SET_WALLPAPER"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
 
     
 
@@ -198,5 +199,7 @@
         
 
         
+        <service android:name="androidx.browser.customtabs.PostMessageService"
+            android:exported="true"/>
     </application>
 </manifest>
