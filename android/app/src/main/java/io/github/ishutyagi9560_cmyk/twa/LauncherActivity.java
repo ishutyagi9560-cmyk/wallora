@@ -26,6 +26,25 @@ public class LauncherActivity
     private CustomTabsClient mClient;
     private CustomTabsSession mSession;
     private boolean mValidated = false;
+    private boolean mNavigationFinished = false;
+    private boolean mPostMessageRequested = false;
+
+    private void requestPostMessageChannelIfReady() {
+        if (!mValidated || !mNavigationFinished || mSession == null || mPostMessageRequested) {
+            return;
+        }
+
+        boolean requested = mSession.requestPostMessageChannel(
+                WALLORA_ORIGIN,
+                WALLORA_ORIGIN,
+                new Bundle());
+
+        Log.d(TAG, "PostMessage channel requested: " + requested);
+
+        if (requested) {
+            mPostMessageRequested = true;
+        }
+    }
 
     private final CustomTabsCallback mCustomTabsCallback =
             new CustomTabsCallback() {
@@ -40,6 +59,7 @@ public class LauncherActivity
             mValidated = result;
 
             Log.d(TAG, "Origin validation: " + result);
+            requestPostMessageChannelIfReady();
         }
 
         @Override
@@ -51,23 +71,14 @@ public class LauncherActivity
                 return;
             }
 
-            if (!mValidated || mSession == null) {
-                Log.d(TAG, "PostMessage not started: origin not validated.");
-                return;
-            }
-
-            boolean requested =
-                    mSession.requestPostMessageChannel(
-                            WALLORA_ORIGIN,
-                            WALLORA_ORIGIN,
-                            new Bundle());
-
-            Log.d(TAG, "PostMessage channel requested: " + requested);
+            mNavigationFinished = true;
+            requestPostMessageChannelIfReady();
         }
 
         @Override
         public void onMessageChannelReady(@Nullable Bundle extras) {
             Log.d(TAG, "PostMessage channel ready.");
+
 
             if (mSession != null) {
                 mSession.postMessage("WALLORA_READY", null);
@@ -125,6 +136,9 @@ public class LauncherActivity
 
             mSession =
                     mClient.newSession(mCustomTabsCallback);
+
+            mNavigationFinished = false;
+            mPostMessageRequested = false;
 
             if (mSession != null) {
                 mSession.validateRelationship(
