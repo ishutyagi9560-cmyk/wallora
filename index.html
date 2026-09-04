@@ -1223,16 +1223,39 @@ function downloadWallpaper() {
 
 /* SET WALLPAPER */
 
+let walloraNativePort = null;
+
+window.addEventListener("message", function(event) {
+    if (event.origin !== "https://ishutyagi9560-cmyk.github.io") return;
+    if (!event.ports || !event.ports[0]) return;
+
+    walloraNativePort = event.ports[0];
+
+    walloraNativePort.onmessage = function(e) {
+        if (e.data === "WALLPAPER_SET_SUCCESS") {
+            showToast("✅ Wallpaper set successfully!");
+        }
+        if (e.data === "WALLPAPER_SET_FAILED") {
+            showToast("❌ Wallpaper set failed.");
+        }
+    };
+});
+
 function setWallpaper(){
+    const item = wallpapers[currentWallpaper];
 
-showToast(
-"✨ Wallpaper image opened — save it and set from your phone"
-);
+    if (!item || !item.image) {
+        showToast("❌ Wallpaper not found.");
+        return;
+    }
 
-const item=wallpapers[currentWallpaper];
+    if (!walloraNativePort) {
+        showToast("⚠️ Native wallpaper feature is not ready.");
+        return;
+    }
 
-window.open(item.image,"_blank");
-
+    walloraNativePort.postMessage("SET_WALLPAPER:" + item.image);
+    showToast("⏳ Setting wallpaper...");
 }
 
 
