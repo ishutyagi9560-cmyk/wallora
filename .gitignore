@@ -10,3 +10,5 @@ android/.gradle/
 android/build/
 android/app/src/main/java/io/github/ishutyagi9560_cmyk/twa/LauncherActivity.java.before-actual-bridge
 android/app/src/main/java/io/github/ishutyagi9560_cmyk/twa/LauncherActivity.java.before-service-fix
+
+android/app/src/main/java/io/github/ishutyagi9560_cmyk/twa/LauncherActivity.java.before-real-bridge-fix
