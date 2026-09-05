@@ -82,7 +82,7 @@ public class LauncherActivity
 
                     Log.d(TAG, "TWA navigation finished.");
 
-                    requestBridgeChannel();
+                    requestBridgeChannelWithRetry();
                 }
 
                 @Override
@@ -151,6 +151,18 @@ public class LauncherActivity
                             }));
                 }
             };
+
+    private void requestBridgeChannelWithRetry() {
+        requestBridgeChannel();
+
+        new android.os.Handler(android.os.Looper.getMainLooper())
+                .postDelayed(() -> {
+                    if (!mChannelRequested) {
+                        Log.d(TAG, "Retrying PostMessage channel request...");
+                        requestBridgeChannel();
+                    }
+                }, 200);
+    }
 
     private void requestBridgeChannel() {
 
