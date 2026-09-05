@@ -13,8 +13,11 @@ import androidx.browser.customtabs.CustomTabsCallback;
 import androidx.browser.customtabs.CustomTabsClient;
 import androidx.browser.customtabs.CustomTabsServiceConnection;
 import androidx.browser.customtabs.CustomTabsSession;
+import androidx.browser.trusted.TrustedWebActivityIntent;
+import androidx.browser.trusted.TrustedWebActivityIntentBuilder;
 
-import java.lang.reflect.Field;
+import com.google.androidbrowserhelper.trusted.TwaLauncher;
+import com.google.androidbrowserhelper.trusted.splashscreens.SplashScreenStrategy;
 
 public class LauncherActivity
         extends com.google.androidbrowserhelper.trusted.LauncherActivity {
@@ -24,186 +27,249 @@ public class LauncherActivity
     private static final Uri WALLORA_ORIGIN =
             Uri.parse("https://ishutyagi9560-cmyk.github.io");
 
-    private CustomTabsSession mActualSession;
-    private final CustomTabsServiceConnection mServiceConnection = new CustomTabsServiceConnection() {
-        @Override
-        public void onCustomTabsServiceConnected(@NonNull ComponentName name, @NonNull CustomTabsClient client) {
-            client.warmup(0);
-            Log.d(TAG, "Custom Tabs service warmed up.");
-        }
-
-        @Override
-        public void onServiceDisconnected(@NonNull ComponentName name) {
-            Log.d(TAG, "Custom Tabs service disconnected.");
-        }
-    };
+    private CustomTabsClient mClient;
+    private CustomTabsSession mSession;
     private boolean mChannelRequested = false;
 
-    private CustomTabsSession getActualTwaSession() {
-        try {
-            Field launcherField =
-                    com.google.androidbrowserhelper.trusted.LauncherActivity.class
-                            .getDeclaredField("mTwaLauncher");
+    private final CustomTabsServiceConnection mServiceConnection =
+            new CustomTabsServiceConnection() {
 
-            launcherField.setAccessible(true);
+                @Override
+                public void onCustomTabsServiceConnected(
+                        @NonNull ComponentName name,
+                        @NonNull CustomTabsClient client) {
 
-            Object twaLauncher = launcherField.get(this);
+                    mClient = client;
 
-            if (twaLauncher == null) {
-                Log.d(TAG, "TwaLauncher is null.");
-                return null;
-            }
+                    client.warmup(0);
 
-            Field sessionField =
-                    twaLauncher.getClass().getDeclaredField("mSession");
+                    mSession = client.newSession(mCustomTabsCallback);
 
-            sessionField.setAccessible(true);
+                    if (mSession == null) {
+                        Log.e(TAG, "Unable to create Custom Tabs session.");
+                        return;
+                    }
 
-            Object session = sessionField.get(twaLauncher);
+                    Log.d(TAG, "Wallora Custom Tabs session created.");
 
-            if (session instanceof CustomTabsSession) {
-                return (CustomTabsSession) session;
-            }
+                    launchTwa();
+                }
 
-        } catch (Exception e) {
-            Log.e(TAG, "Unable to get actual TWA session.", e);
-        }
+                @Override
+                public void onServiceDisconnected(
+                        @NonNull ComponentName name) {
 
-        return null;
-    }
+                    mClient = null;
+                    mSession = null;
+
+                    Log.d(TAG, "Custom Tabs service disconnected.");
+                }
+            };
+
+    private final CustomTabsCallback mCustomTabsCallback =
+            new CustomTabsCallback() {
+
+                @Override
+                public void onNavigationEvent(
+                        int navigationEvent,
+                        @Nullable Bundle extras) {
+
+                    super.onNavigationEvent(navigationEvent, extras);
+
+                    if (navigationEvent != NAVIGATION_FINISHED) {
+                        return;
+                    }
+
+                    Log.d(TAG, "TWA navigation finished.");
+
+                    requestBridgeChannel();
+                }
+
+                @Override
+                public void onMessageChannelReady(
+                        @Nullable Bundle extras) {
+
+                    super.onMessageChannelReady(extras);
+
+                    Log.d(TAG, "PostMessage channel ready.");
+
+                    if (mSession != null) {
+                        int result =
+                                mSession.postMessage("WALLORA_READY", null);
+
+                        Log.d(TAG,
+                                "WALLORA_READY postMessage result: "
+                                        + result);
+                    }
+                }
+
+                @Override
+                public void onPostMessage(
+                        @NonNull String message,
+                        @Nullable Bundle extras) {
+
+                    super.onPostMessage(message, extras);
+
+                    Log.d(TAG, "Web message: " + message);
+
+                    if (!message.startsWith("SET_WALLPAPER:")) {
+                        return;
+                    }
+
+                    String imageUrl =
+                            message.substring("SET_WALLPAPER:".length());
+
+                    if (imageUrl.isEmpty()) {
+                        Log.e(TAG, "Empty wallpaper URL.");
+                        return;
+                    }
+
+                    WallpaperHelper.setWallpaperAsync(
+                            LauncherActivity.this,
+                            imageUrl,
+                            success -> runOnUiThread(() -> {
+
+                                if (mSession == null) {
+                                    return;
+                                }
+
+                                if (success) {
+                                    mSession.postMessage(
+                                            "WALLPAPER_SET_SUCCESS",
+                                            null);
+
+                                    Log.d(TAG,
+                                            "Wallpaper set successfully.");
+                                } else {
+                                    mSession.postMessage(
+                                            "WALLPAPER_SET_FAILED",
+                                            null);
+
+                                    Log.e(TAG,
+                                            "Wallpaper set failed.");
+                                }
+                            }));
+                }
+            };
 
     private void requestBridgeChannel() {
+
         if (mChannelRequested) {
             return;
         }
 
-        CustomTabsSession session = getActualTwaSession();
-
-        if (session == null) {
-            Log.d(TAG, "Actual TWA session not ready.");
+        if (mSession == null) {
+            Log.e(TAG, "Cannot request channel: session is null.");
             return;
         }
 
-        mActualSession = session;
+        boolean requested =
+                mSession.requestPostMessageChannel(
+                        WALLORA_ORIGIN,
+                        WALLORA_ORIGIN,
+                        new Bundle());
 
-        boolean requested = session.requestPostMessageChannel(
-                WALLORA_ORIGIN,
-                WALLORA_ORIGIN,
-                new Bundle());
-
-        Log.d(TAG, "PostMessage channel requested: " + requested);
+        Log.d(TAG,
+                "PostMessage channel requested: " + requested);
 
         if (requested) {
             mChannelRequested = true;
         }
     }
 
-    private final CustomTabsCallback mCustomTabsCallback =
-            new CustomTabsCallback() {
-
-        @Override
-        public void onNavigationEvent(
-                int navigationEvent,
-                @Nullable Bundle extras) {
-
-            super.onNavigationEvent(navigationEvent, extras);
-
-            if (navigationEvent == NAVIGATION_FINISHED) {
-                Log.d(TAG, "TWA navigation finished.");
-                requestBridgeChannel();
-            }
-        }
-
-        @Override
-        public void onMessageChannelReady(
-                @Nullable Bundle extras) {
-
-            super.onMessageChannelReady(extras);
-
-            Log.d(TAG, "PostMessage channel ready.");
-
-            if (mActualSession != null) {
-                mActualSession.postMessage(
-                        "WALLORA_READY",
-                        null);
-            }
-        }
-
-        @Override
-        public void onPostMessage(
-                @NonNull String message,
-                @Nullable Bundle extras) {
-
-            super.onPostMessage(message, extras);
-
-            Log.d(TAG, "Web message: " + message);
-
-            if (!message.startsWith("SET_WALLPAPER:")) {
-                return;
-            }
-
-            String imageUrl =
-                    message.substring("SET_WALLPAPER:".length());
-
-            if (imageUrl.isEmpty()) {
-                return;
-            }
-
-            WallpaperHelper.setWallpaperAsync(
-                    LauncherActivity.this,
-                    imageUrl,
-                    success -> runOnUiThread(() -> {
-
-                        if (mActualSession == null) {
-                            return;
-                        }
-
-                        if (success) {
-                            mActualSession.postMessage(
-                                    "WALLPAPER_SET_SUCCESS",
-                                    null);
-                        } else {
-                            mActualSession.postMessage(
-                                    "WALLPAPER_SET_FAILED",
-                                    null);
-                        }
-                    }));
-        }
-    };
-
     @Override
-    protected CustomTabsCallback getCustomTabsCallback() {
-        return mCustomTabsCallback;
+    protected boolean shouldLaunchImmediately() {
+        return false;
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        String packageName = CustomTabsClient.getPackageName(this, null);
-        if (packageName != null) {
-            CustomTabsClient.bindCustomTabsService(this, packageName, mServiceConnection);
+        String packageName =
+                CustomTabsClient.getPackageName(this, null);
+
+        if (packageName == null) {
+            Log.e(TAG, "No Custom Tabs provider found.");
+            return;
         }
 
+        boolean bound =
+                CustomTabsClient.bindCustomTabsService(
+                        this,
+                        packageName,
+                        mServiceConnection);
+
+        Log.d(TAG,
+                "Custom Tabs service bind result: " + bound);
+
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) {
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT);
+            setRequestedOrientation(
+                    ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT);
         } else {
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+            setRequestedOrientation(
+                    ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+        }
+    }
+
+    @Override
+    protected TwaLauncher createTwaLauncher() {
+        return new WalloraTwaLauncher();
+    }
+
+    private class WalloraTwaLauncher extends TwaLauncher {
+
+        WalloraTwaLauncher() {
+            super(LauncherActivity.this);
+        }
+
+        @Override
+        public void launch(
+                TrustedWebActivityIntentBuilder twaBuilder,
+                CustomTabsCallback customTabsCallback,
+                @Nullable SplashScreenStrategy splashScreenStrategy,
+                @Nullable Runnable completionCallback,
+                FallbackStrategy fallbackStrategy) {
+
+            if (mSession == null) {
+                Log.e(TAG,
+                        "Cannot launch TWA: session is null.");
+
+                fallbackStrategy.launch(
+                        LauncherActivity.this,
+                        twaBuilder,
+                        getProviderPackage(),
+                        completionCallback);
+
+                return;
+            }
+
+            Log.d(TAG,
+                    "Launching TWA with Wallora-owned session.");
+
+            TrustedWebActivityIntent intent =
+                    twaBuilder.build(mSession);
+
+            intent.launchTrustedWebActivity(
+                    LauncherActivity.this);
+
+            if (completionCallback != null) {
+                completionCallback.run();
+            }
         }
     }
 
     @Override
     protected void onDestroy() {
+
         try {
             unbindService(mServiceConnection);
         } catch (Exception ignored) {
         }
-        mActualSession = null;
-        super.onDestroy();
-    }
 
-    @Override
-    protected Uri getLaunchingUrl() {
-        return super.getLaunchingUrl();
+        mSession = null;
+        mClient = null;
+
+        super.onDestroy();
     }
 }
